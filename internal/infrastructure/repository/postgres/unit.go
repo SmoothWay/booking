@@ -5,16 +5,15 @@ import (
 	"database/sql"
 
 	"github.com/SmoothWay/booking/internal/domain"
-	"github.com/rogpeppe/go-internal/cache"
 )
 
 type unitRepository struct {
 	db    *sql.DB
-	cache *cache.Cache
+	cache *domain.CacheRepository
 }
 
-func NewUnitRepository(db *sql.DB) *unitRepository {
-	return &unitRepository{db: db}
+func NewUnitRepository(db *sql.DB, cache *domain.CacheRepository) *unitRepository {
+	return &unitRepository{db: db, cache: cache}
 }
 
 func (r *unitRepository) GetUnitByID(ctx context.Context, id string) (*domain.Unit, error) {
