@@ -51,7 +51,6 @@ func main() {
 	// Start Kafka consumer in a goroutine
 	go func() {
 		if err := kafkaConsumer.ConsumeLoop(ctx, func(msg *confluentkafka.Message) error {
-			// This will be handled by the specific handlers
 			return nil
 		}); err != nil {
 			log.Printf("Kafka consumer error: %v", err)
@@ -60,12 +59,12 @@ func main() {
 
 	server := http.NewServer(cfg.HTTP, bookingUsecase, userUsecase, unitUsecase)
 	go func() {
+		log.Println("Starting HTTP server on port", cfg.HTTP.Port)
 		if err := server.Start(); err != nil {
 			log.Printf("HTTP server error: %v", err)
 		}
 	}()
 
-	// Wait for shutdown signal
 	<-sigChan
 	log.Println("Shutting down gracefully...")
 	cancel()

@@ -29,3 +29,24 @@ func (uc *UnitUsecase) CreateUnit(ctx context.Context, event events.UnitCreatedE
 
 	return uc.unitRepo.CreateUnit(ctx, unit)
 }
+
+func (uc *UnitUsecase) GetUnits(ctx context.Context, page int, pageSize int) ([]domain.Unit, error) {
+	units, err := uc.unitRepo.GetUnits(ctx, page, pageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	var unitsDomain []domain.Unit
+	for _, unit := range units {
+		unitsDomain = append(unitsDomain, *unit)
+	}
+	return unitsDomain, nil
+}
+
+func (uc *UnitUsecase) GetUnitByID(ctx context.Context, id string) (domain.Unit, error) {
+	unit, err := uc.unitRepo.GetUnitByID(ctx, id)
+	if err != nil {
+		return domain.Unit{}, err
+	}
+	return *unit, nil
+}

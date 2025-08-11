@@ -6,10 +6,13 @@ import (
 
 	"github.com/SmoothWay/booking/internal/config"
 	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/lib/pq"
 )
 
 func NewPostgres(cfg config.DB) (*sql.DB, error) {
-	dbUrl := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Name)
+	dbUrl := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Name)
 	db, err := sql.Open("postgres", dbUrl)
 	if err != nil {
 		return nil, err

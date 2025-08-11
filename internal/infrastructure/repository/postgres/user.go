@@ -15,6 +15,26 @@ func NewUserRepository(db *sql.DB) *userRepository {
 	return &userRepository{db: db}
 }
 
+func (r *userRepository) GetUsers(ctx context.Context, page int, pageSize int) ([]*domain.User, error) {
+	query := `SELECT id, name, email, phone_number, password, role, created_at, updated_at, deleted_at FROM users LIMIT $1 OFFSET $2`
+	rows, err := r.db.QueryContext(ctx, query, pageSize, (page-1)*pageSize)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*domain.User
+	for rows.Next() {
+		var user domain.User
+		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.PhoneNumber, &user.Password, &user.Role, &user.CreatedAt, &user.UpdatedAt, &user.DeletedAt)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, &user)
+	}
+	return users, nil
+}
+
 func (r *userRepository) GetUserByID(ctx context.Context, id string) (*domain.User, error) {
 	query := `SELECT id, name, email, phone_number, password, role, created_at, updated_at, deleted_at FROM users WHERE id = $1`
 	var user domain.User

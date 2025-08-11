@@ -10,6 +10,7 @@ type UserRepository interface {
 	CreateUser(ctx context.Context, user *User) error
 	UpdateUser(ctx context.Context, user *User) error
 	DeleteUser(ctx context.Context, id string) error
+	GetUsers(ctx context.Context, page int, pageSize int) ([]*User, error)
 }
 
 type UnitRepository interface {
@@ -17,6 +18,7 @@ type UnitRepository interface {
 	CreateUnit(ctx context.Context, unit *Unit) error
 	UpdateUnit(ctx context.Context, unit *Unit) error
 	DeleteUnit(ctx context.Context, id string) error
+	GetUnits(ctx context.Context, page int, pageSize int) ([]*Unit, error)
 }
 
 type BookingRepository interface {

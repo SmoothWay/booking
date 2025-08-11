@@ -81,3 +81,16 @@ func (uc *BookingUsecase) CancelBooking(ctx context.Context, event events.Bookin
 
 	return uc.bookingRepo.UpdateBooking(ctx, booking)
 }
+
+func (uc *BookingUsecase) GetBookingsByUserID(ctx context.Context, userID string, limit, offset int) ([]domain.Booking, error) {
+	bookings, err := uc.bookingRepo.GetBookingsByUserID(ctx, userID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	var bookingsDomain []domain.Booking
+	for _, booking := range bookings {
+		bookingsDomain = append(bookingsDomain, *booking)
+	}
+	return bookingsDomain, nil
+}

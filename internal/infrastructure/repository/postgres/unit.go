@@ -16,6 +16,26 @@ func NewUnitRepository(db *sql.DB, cache domain.CacheRepository) *unitRepository
 	return &unitRepository{db: db, cache: cache}
 }
 
+func (r *unitRepository) GetUnits(ctx context.Context, page int, pageSize int) ([]*domain.Unit, error) {
+	query := `SELECT id, name, description, price, created_at, updated_at, deleted_at FROM units LIMIT $1 OFFSET $2`
+	rows, err := r.db.QueryContext(ctx, query, pageSize, (page-1)*pageSize)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var units []*domain.Unit
+	for rows.Next() {
+		var unit domain.Unit
+		err := rows.Scan(&unit.ID, &unit.Name, &unit.Description, &unit.Price, &unit.CreatedAt, &unit.UpdatedAt, &unit.DeletedAt)
+		if err != nil {
+			return nil, err
+		}
+		units = append(units, &unit)
+	}
+	return units, nil
+}
+
 func (r *unitRepository) GetUnitByID(ctx context.Context, id string) (*domain.Unit, error) {
 	query := `SELECT id, name, description, price, created_at, updated_at, deleted_at FROM units WHERE id = $1`
 	var unit domain.Unit
