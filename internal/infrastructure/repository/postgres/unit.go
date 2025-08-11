@@ -9,10 +9,10 @@ import (
 
 type unitRepository struct {
 	db    *sql.DB
-	cache *domain.CacheRepository
+	cache domain.CacheRepository
 }
 
-func NewUnitRepository(db *sql.DB, cache *domain.CacheRepository) *unitRepository {
+func NewUnitRepository(db *sql.DB, cache domain.CacheRepository) *unitRepository {
 	return &unitRepository{db: db, cache: cache}
 }
 

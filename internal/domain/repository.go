@@ -26,6 +26,8 @@ type BookingRepository interface {
 	DeleteBooking(ctx context.Context, id string) error
 	GetBookingsByDateRange(ctx context.Context, startDate, endDate time.Time, limit, offset int) ([]*Booking, error)
 	GetBookingsByUnitID(ctx context.Context, unitID string, limit, offset int) ([]*Booking, error)
+	GetBookings(ctx context.Context, page int, pageSize int) ([]*Booking, error)
+	GetBookingsByUserID(ctx context.Context, userID string, limit, offset int) ([]*Booking, error)
 }
 
 type CacheRepository interface {

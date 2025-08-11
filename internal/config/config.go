@@ -10,16 +10,33 @@ import (
 )
 
 type Config struct {
-	Port int `env:"PORT" yaml:"port" json:"port"`
-	DB   `yaml:"db" json:"db"`
+	HTTP  `yaml:"http" json:"http"`
+	DB    `yaml:"db" json:"db"`
+	Redis `yaml:"redis" json:"redis"`
+	Kafka `yaml:"kafka" json:"kafka"`
 }
 
+type HTTP struct {
+	Port int `env:"HTTP_PORT" yaml:"port" json:"port"`
+}
 type DB struct {
-	Host     string `env:"DB_HOST" yaml:"host" json:"host"`
-	Port     int    `env:"DB_PORT" yaml:"port" json:"port"`
-	User     string `env:"DB_USER" yaml:"user" json:"user"`
-	Password string `env:"DB_PASSWORD" yaml:"password" json:"password"`
-	Name     string `env:"DB_NAME" yaml:"name" json:"name"`
+	Host         string `env:"DB_HOST" yaml:"host" json:"host"`
+	Port         int    `env:"DB_PORT" yaml:"port" json:"port"`
+	User         string `env:"DB_USER" yaml:"user" json:"user"`
+	Password     string `env:"DB_PASSWORD" yaml:"password" json:"password"`
+	Name         string `env:"DB_NAME" yaml:"name" json:"name"`
+	MigrationDir string `env:"DB_MIGRATION_DIR" yaml:"migration_dir" json:"migration_dir"`
+}
+
+type Redis struct {
+	Addr     string `env:"REDIS_ADDR" yaml:"addr" json:"addr"`
+	Password string `env:"REDIS_PASSWORD" yaml:"password" json:"password"`
+	DB       int    `env:"REDIS_DB" yaml:"db" json:"db"`
+}
+
+type Kafka struct {
+	Brokers []string `env:"KAFKA_BROKERS" yaml:"brokers" json:"brokers"`
+	GroupID string   `env:"KAFKA_GROUP_ID" yaml:"group_id" json:"group_id"`
 }
 
 func Load(filepath string) (*Config, error) {

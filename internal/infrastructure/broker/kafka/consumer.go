@@ -5,6 +5,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/SmoothWay/booking/internal/config"
+	"github.com/SmoothWay/booking/internal/domain"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
@@ -14,7 +16,7 @@ type Consumer struct {
 	consumer *kafka.Consumer
 }
 
-func NewConsumer(config *KafkaConfig) *Consumer {
+func newConsumer(config *KafkaConfig) *Consumer {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": strings.Join(config.Brokers, ","),
 		"group.id":          config.GroupID,
@@ -48,4 +50,33 @@ func (c *Consumer) ConsumeLoop(ctx context.Context, handler MessageHandler) erro
 		}
 
 	}
+}
+
+func InitKafkaConsumer(cfg *config.Config, bookingUsecase domain.BookingUsecase, userUsecase domain.UserUsecase, unitUsecase domain.UnitUsecase) *Consumer {
+	// Initialize Kafka configuration
+	kafkaConfig := &KafkaConfig{
+		Brokers: cfg.Kafka.Brokers,
+		GroupID: cfg.Kafka.GroupID,
+	}
+
+	consumer := newConsumer(kafkaConfig)
+
+	// Set up topic subscriptions with handlers
+	topics := map[string]func(msg *kafka.Message) error{
+		"booking.created":   BookingCreateHandler(bookingUsecase),
+		"booking.updated":   BookingUpdateHandler(bookingUsecase),
+		"booking.cancelled": BookingCancelHandler(bookingUsecase),
+		"user.created":      UserCreateHandler(userUsecase),
+		"user.updated":      UserUpdateHandler(userUsecase),
+		"unit.created":      UnitCreateHandler(unitUsecase),
+	}
+
+	// Subscribe to all topics
+	for topic, handler := range topics {
+		if err := consumer.Subscribe(topic, handler); err != nil {
+			log.Printf("Failed to subscribe to topic %s: %v", topic, err)
+		}
+	}
+
+	return consumer
 }
