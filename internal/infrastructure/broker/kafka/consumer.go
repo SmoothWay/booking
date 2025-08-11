@@ -45,7 +45,7 @@ func (c *Consumer) ConsumeLoop(ctx context.Context, handler MessageHandler) erro
 					return err
 				}
 			} else {
-				log.Printf("Error reading message: %v", err)
+				log.Printf("Error reading message: %v, error:%v", msg, err)
 			}
 		}
 

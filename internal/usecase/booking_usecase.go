@@ -5,15 +5,18 @@ import (
 
 	"github.com/SmoothWay/booking/internal/domain"
 	"github.com/SmoothWay/booking/internal/domain/events"
+	"github.com/SmoothWay/booking/internal/infrastructure/broker/kafka"
 )
 
 type BookingUsecase struct {
-	bookingRepo domain.BookingRepository
+	kafkaProducer *kafka.Producer
+	bookingRepo   domain.BookingRepository
 }
 
-func NewBookingUsecase(bookingRepo domain.BookingRepository) *BookingUsecase {
+func NewBookingUsecase(kafkaProducer *kafka.Producer, bookingRepo domain.BookingRepository) *BookingUsecase {
 	return &BookingUsecase{
-		bookingRepo: bookingRepo,
+		kafkaProducer: kafkaProducer,
+		bookingRepo:   bookingRepo,
 	}
 }
 

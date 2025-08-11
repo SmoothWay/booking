@@ -7,6 +7,14 @@ import (
 	"github.com/SmoothWay/booking/internal/util"
 )
 
+const (
+	ErrInternalServerError = "internal server error"
+)
+
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
 type Handler struct {
 	bookingUsecase domain.BookingUsecase
 	userUsecase    domain.UserUsecase
@@ -14,8 +22,8 @@ type Handler struct {
 }
 
 type PageRequest struct {
-	Page     int `json:"page"`
-	PageSize int `json:"page_size"`
+	Page     int `json:"page" validate:"min=1"`
+	PageSize int `json:"page_size" validate:"min=1,max=1000"`
 }
 
 type Pageable struct {

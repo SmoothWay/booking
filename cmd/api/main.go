@@ -31,13 +31,16 @@ func main() {
 	redisCache := cache.NewRedisCache(cfg.Redis.Addr, cfg.Redis.Password, cfg.Redis.DB)
 	defer redisCache.Close()
 
+	kafkaProducer := kafka.NewProducer(cfg.Kafka.Brokers)
+	defer kafkaProducer.Close()
+
 	bookingRepo := postgres.NewBookingRepository(db)
 	userRepo := postgres.NewUserRepository(db)
 	unitRepo := postgres.NewUnitRepository(db, redisCache)
 
-	bookingUsecase := usecase.NewBookingUsecase(bookingRepo)
-	userUsecase := usecase.NewUserUsecase(userRepo)
-	unitUsecase := usecase.NewUnitUsecase(unitRepo)
+	bookingUsecase := usecase.NewBookingUsecase(kafkaProducer, bookingRepo)
+	userUsecase := usecase.NewUserUsecase(kafkaProducer, userRepo)
+	unitUsecase := usecase.NewUnitUsecase(kafkaProducer, unitRepo)
 
 	// TODO: wrap usecases into domain.Usecase interface maybe?
 	kafkaConsumer := kafka.InitKafkaConsumer(cfg, bookingUsecase, userUsecase, unitUsecase)

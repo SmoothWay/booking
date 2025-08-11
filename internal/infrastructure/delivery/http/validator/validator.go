@@ -26,9 +26,9 @@ func Validate(data any) error {
 			label = labelTag
 		}
 		if tag := fieldErr.Param(); tag != "" {
-			errMsg += label + " failed on the '" + fieldErr.Tag() + "' tag (param: " + tag + "); "
+			errMsg += label + " cannot be " + fieldErr.Tag() + " (param: " + tag + "); "
 		} else {
-			errMsg += label + " failed on the '" + fieldErr.Tag() + "' tag; "
+			errMsg += label + " cannot be " + fieldErr.Tag() + "; "
 		}
 	}
 	if errMsg == "" {

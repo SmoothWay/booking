@@ -7,8 +7,9 @@ type UserCreatedEvent struct {
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`
 	Email       string    `json:"email"`
-	PhoneNumber string    `json:"phone_number"`
+	PhoneNumber string    `json:"phone"`
 	Role        string    `json:"role"`
+	Password    string    `json:"password"`
 	CreatedAt   time.Time `json:"created_at"`
 }
 
@@ -17,7 +18,7 @@ type UserUpdatedEvent struct {
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`
 	Email       string    `json:"email"`
-	PhoneNumber string    `json:"phone_number"`
+	PhoneNumber string    `json:"phone"`
 	Role        string    `json:"role"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }

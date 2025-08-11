@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/SmoothWay/booking/internal/domain"
@@ -12,18 +13,33 @@ import (
 func (h *Handler) GetUnits(w http.ResponseWriter, r *http.Request) {
 	var req PageRequest
 	if err := util.ReadJSON(r, &req); err != nil {
-		util.WriteJSON(w, http.StatusBadRequest, err.Error())
+		util.WriteJSON(w, http.StatusBadRequest, ErrorResponse{
+			Error: err.Error(),
+		})
 		return
 	}
 
+	if req.Page == 0 {
+		req.Page = 1
+	}
+
+	if req.PageSize == 0 {
+		req.PageSize = 10
+	}
+
 	if err := validator.Validate(req); err != nil {
-		util.WriteJSON(w, http.StatusBadRequest, err.Error())
+		util.WriteJSON(w, http.StatusBadRequest, ErrorResponse{
+			Error: err.Error(),
+		})
 		return
 	}
 
 	units, err := h.unitUsecase.GetUnits(r.Context(), req.Page, req.PageSize)
 	if err != nil {
-		util.WriteJSON(w, http.StatusInternalServerError, err.Error())
+		log.Println("getunits error:", err)
+		util.WriteJSON(w, http.StatusInternalServerError, ErrorResponse{
+			Error: ErrInternalServerError,
+		})
 		return
 	}
 
@@ -40,7 +56,9 @@ func (h *Handler) GetUnits(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) CreateUnit(w http.ResponseWriter, r *http.Request) {
 	var req CreateUnitRequest
 	if err := util.ReadJSON(r, &req); err != nil {
-		util.WriteJSON(w, http.StatusBadRequest, err.Error())
+		util.WriteJSON(w, http.StatusBadRequest, ErrorResponse{
+			Error: err.Error(),
+		})
 		return
 	}
 
@@ -50,7 +68,10 @@ func (h *Handler) CreateUnit(w http.ResponseWriter, r *http.Request) {
 		Price:       float64(req.Price),
 	})
 	if err != nil {
-		util.WriteJSON(w, http.StatusInternalServerError, err.Error())
+		log.Println("createunit error:", err)
+		util.WriteJSON(w, http.StatusInternalServerError, ErrorResponse{
+			Error: ErrInternalServerError,
+		})
 		return
 	}
 

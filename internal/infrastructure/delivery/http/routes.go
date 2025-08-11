@@ -9,17 +9,19 @@ func SetupRoutes(router *chi.Mux, handler *handler.Handler) {
 
 	router.Route("/api/v1/booking", func(r chi.Router) {
 		r.Get("/", handler.GetBookings)
-		// r.Post("/", handler.CreateBooking)
+		r.Post("/", handler.CreateBooking)
 		// r.Put("/{id}", handler.UpdateBooking)
 		// r.Delete("/{id}", handler.DeleteBooking)
 	})
 
 	router.Route("/api/v1/user", func(r chi.Router) {
 		r.Get("/", handler.GetUsers)
+		r.Post("/", handler.CreateUser)
 	})
 
 	router.Route("/api/v1/unit", func(r chi.Router) {
 		r.Get("/", handler.GetUnits)
+		r.Post("/", handler.CreateUnit)
 	})
 
 	router.Route("/probes", func(r chi.Router) {
