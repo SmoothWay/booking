@@ -3,11 +3,13 @@ package usecase
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/SmoothWay/booking/internal/domain"
 	"github.com/SmoothWay/booking/internal/domain/events"
 	"github.com/SmoothWay/booking/internal/infrastructure/broker/kafka"
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 type UserUsecase struct {
@@ -35,6 +37,12 @@ func (uc *UserUsecase) CreateUser(ctx context.Context, event events.UserCreatedE
 	}
 	err := uc.userRepo.CreateUser(ctx, user)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			if pqErr.Code == "23505" {
+				fmt.Println("Duplicate key violation:", pqErr.Constraint)
+				return domain.ErrUserAlreadyExists
+			}
+		}
 		return err
 	}
 
@@ -43,7 +51,7 @@ func (uc *UserUsecase) CreateUser(ctx context.Context, event events.UserCreatedE
 		return err
 	}
 
-	err = uc.kafkaProducer.SendMessage(ctx, "user_created", json)
+	err = uc.kafkaProducer.SendMessage(ctx, "user.created", json)
 	if err != nil {
 		return err
 	}

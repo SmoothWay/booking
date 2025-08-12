@@ -16,5 +16,5 @@ redis:
 
 kafka:
   brokers:
-    - localhost:9092
+    - localhost
   group_id: booking

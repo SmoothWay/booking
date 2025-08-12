@@ -13,7 +13,6 @@ import (
 	"github.com/SmoothWay/booking/internal/infrastructure/delivery/http"
 	"github.com/SmoothWay/booking/internal/infrastructure/repository/postgres"
 	"github.com/SmoothWay/booking/internal/usecase"
-	confluentkafka "github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
 func main() {
@@ -31,7 +30,7 @@ func main() {
 	redisCache := cache.NewRedisCache(cfg.Redis.Addr, cfg.Redis.Password, cfg.Redis.DB)
 	defer redisCache.Close()
 
-	kafkaProducer := kafka.NewProducer(cfg.Kafka.Brokers)
+	kafkaProducer := kafka.NewProducer(cfg.Kafka.Brokers, cfg.Kafka.GroupID)
 	defer kafkaProducer.Close()
 
 	bookingRepo := postgres.NewBookingRepository(db)
@@ -44,6 +43,7 @@ func main() {
 
 	// TODO: wrap usecases into domain.Usecase interface maybe?
 	kafkaConsumer := kafka.InitKafkaConsumer(cfg, bookingUsecase, userUsecase, unitUsecase)
+	dltConsumer := kafka.InitDLTConsumer(cfg, userUsecase)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -53,10 +53,15 @@ func main() {
 
 	// Start Kafka consumer in a goroutine
 	go func() {
-		if err := kafkaConsumer.ConsumeLoop(ctx, func(msg *confluentkafka.Message) error {
-			return nil
-		}); err != nil {
+		if err := kafkaConsumer.ConsumeLoop(ctx, nil); err != nil {
 			log.Printf("Kafka consumer error: %v", err)
+		}
+	}()
+
+	// Start DLT consumer in a goroutine
+	go func() {
+		if err := dltConsumer.ConsumeDLTLoop(ctx); err != nil {
+			log.Printf("DLT consumer error: %v", err)
 		}
 	}()
 

@@ -75,11 +75,19 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Println("createuser error:", err)
+		if err == domain.ErrUserAlreadyExists {
+			util.WriteJSON(w, http.StatusBadRequest, ErrorResponse{
+				Error: "User already exists",
+			})
+			return
+		}
 		util.WriteJSON(w, http.StatusInternalServerError, ErrorResponse{
 			Error: ErrInternalServerError,
 		})
 		return
 	}
+
+	util.WriteJSON(w, http.StatusOK, nil)
 }
 
 func usersToResponse(users []domain.User) []User {

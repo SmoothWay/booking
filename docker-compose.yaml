@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   postgres:
     image: postgres:15
@@ -9,10 +11,15 @@ services:
       POSTGRES_DB: booking
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    networks:
+      - booking-network
+      
   redis:
     image: redis:7
     ports:
       - 6379:6379
+    networks:
+      - booking-network
   
   kafka:
     image: confluentinc/cp-kafka:latest
@@ -25,6 +32,8 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
       KAFKA_DELETE_TOPIC_ENABLE: true
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_MIN_INSYNC_REPLICAS: 1
       KAFKA_LOG_RETENTION_BYTES: 1073741824
       KAFKA_LOG_RETENTION_MS: 1000
       KAFKA_LOG_SEGMENT_BYTES: 1073741824
@@ -32,6 +41,15 @@ services:
       KAFKA_LOG_CLEANUP_POLICY: delete
       KAFKA_LOG_CLEANUP_POLICY_DELETE: true
       KAFKA_LOG_CLEANUP_POLICY_COMPACT: false
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - booking-network
+    depends_on:
+      - zookeeper
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -45,6 +63,10 @@ services:
       ZOOKEEPER_MAX_CLIENT_CNXNS: 60
       ZOOKEEPER_AUTOPURGE_PURGEINTERVAL: 0
       ZOOKEEPER_AUTOPURGE_SNAPRETAINCOUNT: 3
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+    networks:
+      - booking-network
 
 networks:
   booking-network:

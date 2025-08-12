@@ -1,6 +1,13 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var (
+	ErrUserAlreadyExists = errors.New("user already exists")
+)
 
 type User struct {
 	ID          string
