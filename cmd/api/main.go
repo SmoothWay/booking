@@ -43,7 +43,7 @@ func main() {
 
 	// TODO: wrap usecases into domain.Usecase interface maybe?
 	kafkaConsumer := kafka.InitKafkaConsumer(cfg, bookingUsecase, userUsecase, unitUsecase)
-	dltConsumer := kafka.InitDLTConsumer(cfg, userUsecase)
+	// dltConsumer := kafka.InitDLTConsumer(cfg, userUsecase)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -59,11 +59,11 @@ func main() {
 	}()
 
 	// Start DLT consumer in a goroutine
-	go func() {
-		if err := dltConsumer.ConsumeDLTLoop(ctx); err != nil {
-			log.Printf("DLT consumer error: %v", err)
-		}
-	}()
+	// go func() {
+	// 	if err := dltConsumer.ConsumeDLTLoop(ctx); err != nil {
+	// 		log.Printf("DLT consumer error: %v", err)
+	// 	}
+	// }()
 
 	server := http.NewServer(cfg.HTTP, bookingUsecase, userUsecase, unitUsecase)
 	go func() {

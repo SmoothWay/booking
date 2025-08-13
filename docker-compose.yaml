@@ -44,8 +44,18 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-    volumes:
-      - kafka-data:/var/lib/kafka/data
+      KAFKA_CREATE_TOPICS: >
+        user-created:1:1,
+        user-updated:1:1,
+        user-deleted:1:1,
+        booking-created:1:1,
+        booking-updated:1:1,
+        booking-deleted:1:1,
+        unit-created:1:1,
+        unit-updated:1:1,
+        unit-deleted:1:1
+    # volumes:
+      # - kafka-data:/var/lib/kafka/data
     networks:
       - booking-network
     depends_on:
@@ -63,8 +73,6 @@ services:
       ZOOKEEPER_MAX_CLIENT_CNXNS: 60
       ZOOKEEPER_AUTOPURGE_PURGEINTERVAL: 0
       ZOOKEEPER_AUTOPURGE_SNAPRETAINCOUNT: 3
-    volumes:
-      - zookeeper-data:/var/lib/zookeeper/data
     networks:
       - booking-network
 
@@ -75,5 +83,5 @@ networks:
 volumes:
   postgres-data:
   redis-data:
-  kafka-data:
-  zookeeper-data:
+  # kafka-data:
+  # zookeeper-data:
