@@ -27,7 +27,7 @@ func NewRedisCache(addr, password string, db int) *RedisCache {
 }
 
 // Set stores a value in the cache
-func (c *RedisCache) Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
+func (c *RedisCache) Set(ctx context.Context, key string, value any, expiration time.Duration) error {
 	var data []byte
 	var err error
 
@@ -95,7 +95,7 @@ func (c *RedisCache) Increment(ctx context.Context, key string) (int64, error) {
 }
 
 // GetStruct retrieves and unmarshals a struct from the cache
-func (c *RedisCache) GetStruct(ctx context.Context, key string, dest interface{}) error {
+func (c *RedisCache) GetStruct(ctx context.Context, key string, dest any) error {
 	data, err := c.client.Get(ctx, key).Bytes()
 	if err != nil {
 		if err == redis.Nil {
@@ -112,7 +112,7 @@ func (c *RedisCache) GetStruct(ctx context.Context, key string, dest interface{}
 }
 
 // SetStruct marshals and stores a struct in the cache
-func (c *RedisCache) SetStruct(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
+func (c *RedisCache) SetStruct(ctx context.Context, key string, value any, expiration time.Duration) error {
 	data, err := json.Marshal(value)
 	if err != nil {
 		return fmt.Errorf("failed to marshal value: %w", err)

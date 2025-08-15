@@ -8,6 +8,10 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
+type KafkaProducer interface {
+	SendMessage(ctx context.Context, topic string, message []byte) error
+}
+
 type Producer struct {
 	producer *kafka.Producer
 }

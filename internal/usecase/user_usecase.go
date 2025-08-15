@@ -13,11 +13,11 @@ import (
 )
 
 type UserUsecase struct {
-	kafkaProducer *kafka.Producer
+	kafkaProducer kafka.KafkaProducer
 	userRepo      domain.UserRepository
 }
 
-func NewUserUsecase(kafkaProducer *kafka.Producer, userRepo domain.UserRepository) *UserUsecase {
+func NewUserUsecase(kafkaProducer kafka.KafkaProducer, userRepo domain.UserRepository) *UserUsecase {
 	return &UserUsecase{
 		kafkaProducer: kafkaProducer,
 		userRepo:      userRepo,
@@ -26,8 +26,14 @@ func NewUserUsecase(kafkaProducer *kafka.Producer, userRepo domain.UserRepositor
 
 // CreateUser handles user creation from Kafka events
 func (uc *UserUsecase) CreateUser(ctx context.Context, event events.UserCreatedEvent) error {
+	// Use event ID if provided, otherwise generate a new one
+	userID := event.ID
+	if userID == "" {
+		userID = uuid.New().String()
+	}
+
 	user := &domain.User{
-		ID:          uuid.New().String(),
+		ID:          userID,
 		Name:        event.Name,
 		Email:       event.Email,
 		PhoneNumber: event.PhoneNumber,

@@ -3,6 +3,7 @@ package handler
 import (
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/SmoothWay/booking/internal/domain"
@@ -12,31 +13,30 @@ import (
 )
 
 func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
-	var req PageRequest
 
-	if err := util.ReadJSON(r, &req); err != nil {
+	q := r.URL.Query()
+	page, _ := strconv.Atoi(q.Get("page"))
+	pageSize, _ := strconv.Atoi(q.Get("page_size"))
+
+	if page == 0 {
+		page = 1
+	}
+
+	if pageSize == 0 {
+		pageSize = 10
+	}
+
+	if err := validator.Validate(PageRequest{
+		Page:     page,
+		PageSize: pageSize,
+	}); err != nil {
 		util.WriteJSON(w, http.StatusBadRequest, ErrorResponse{
 			Error: err.Error(),
 		})
 		return
 	}
 
-	if req.Page == 0 {
-		req.Page = 1
-	}
-
-	if req.PageSize == 0 {
-		req.PageSize = 10
-	}
-
-	if err := validator.Validate(req); err != nil {
-		util.WriteJSON(w, http.StatusBadRequest, ErrorResponse{
-			Error: err.Error(),
-		})
-		return
-	}
-
-	users, err := h.userUsecase.GetUsers(r.Context(), req.Page, req.PageSize)
+	users, err := h.userUsecase.GetUsers(r.Context(), page, pageSize)
 	if err != nil {
 		log.Println("getusers error:", err)
 		util.WriteJSON(w, http.StatusInternalServerError, ErrorResponse{
@@ -48,8 +48,8 @@ func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, http.StatusOK, GetUsersResponse{
 		Pageable: Pageable{
 			Total:    len(users),
-			Page:     req.Page,
-			PageSize: req.PageSize,
+			Page:     page,
+			PageSize: pageSize,
 		},
 		Users: usersToResponse(users),
 	})

@@ -3,6 +3,7 @@ package handler
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/SmoothWay/booking/internal/domain"
 	"github.com/SmoothWay/booking/internal/domain/events"
@@ -11,30 +12,29 @@ import (
 )
 
 func (h *Handler) GetUnits(w http.ResponseWriter, r *http.Request) {
-	var req PageRequest
-	if err := util.ReadJSON(r, &req); err != nil {
+	q := r.URL.Query()
+	page, _ := strconv.Atoi(q.Get("page"))
+	pageSize, _ := strconv.Atoi(q.Get("page_size"))
+
+	if page == 0 {
+		page = 1
+	}
+
+	if pageSize == 0 {
+		pageSize = 10
+	}
+
+	if err := validator.Validate(PageRequest{
+		Page:     page,
+		PageSize: pageSize,
+	}); err != nil {
 		util.WriteJSON(w, http.StatusBadRequest, ErrorResponse{
 			Error: err.Error(),
 		})
 		return
 	}
 
-	if req.Page == 0 {
-		req.Page = 1
-	}
-
-	if req.PageSize == 0 {
-		req.PageSize = 10
-	}
-
-	if err := validator.Validate(req); err != nil {
-		util.WriteJSON(w, http.StatusBadRequest, ErrorResponse{
-			Error: err.Error(),
-		})
-		return
-	}
-
-	units, err := h.unitUsecase.GetUnits(r.Context(), req.Page, req.PageSize)
+	units, err := h.unitUsecase.GetUnits(r.Context(), page, pageSize)
 	if err != nil {
 		log.Println("getunits error:", err)
 		util.WriteJSON(w, http.StatusInternalServerError, ErrorResponse{
@@ -46,8 +46,8 @@ func (h *Handler) GetUnits(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, http.StatusOK, GetUnitsResponse{
 		Pageable: Pageable{
 			Total:    len(units),
-			Page:     req.Page,
-			PageSize: req.PageSize,
+			Page:     page,
+			PageSize: pageSize,
 		},
 		Units: unitsToResponse(units),
 	})

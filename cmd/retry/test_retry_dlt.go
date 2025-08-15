@@ -14,7 +14,6 @@ import (
 func main() {
 	fmt.Println("=== Kafka Retry & DLT Test Script ===")
 
-	// Test producer
 	brokers := []string{"localhost:9092"}
 	groupID := "booking"
 
@@ -24,7 +23,7 @@ func main() {
 
 	ctx := context.Background()
 
-	// Test 1: Successful message (should be acknowledged immediately)
+	// Test 1: Successful message
 	fmt.Println("\n--- Test 1: Successful Message ---")
 	successEvent := events.UserCreatedEvent{
 		ID:          "success-user-" + fmt.Sprintf("%d", time.Now().Unix()),
@@ -43,7 +42,7 @@ func main() {
 		log.Printf("Failed to send successful message: %v", err)
 	}
 
-	// Test 2: Message that will fail and be retried (test@test.com)
+	// Test 2: Message that will fail and be retried
 	fmt.Println("\n--- Test 2: Message That Will Fail and Be Retried ---")
 	failEvent := events.UserCreatedEvent{
 		ID:          "fail-user-" + fmt.Sprintf("%d", time.Now().Unix()),
@@ -62,7 +61,7 @@ func main() {
 		log.Printf("Failed to send failing message: %v", err)
 	}
 
-	// Test 3: Invalid JSON message (will fail parsing)
+	// Test 3: Invalid JSON message
 	fmt.Println("\n--- Test 3: Invalid JSON Message ---")
 	invalidJSON := []byte(`{"invalid": "json", "missing": "required fields"}`)
 	fmt.Printf("Sending invalid JSON: %s\n", string(invalidJSON))

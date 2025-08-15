@@ -73,26 +73,21 @@ func (c *Consumer) SubscribeWithAck(topic string, handler MessageHandlerWithAck)
 
 // processMessageWithRetry handles message processing with retry logic and DLT
 func (c *Consumer) processMessageWithRetry(topic string, msg *kafka.Message, handler MessageHandlerWithAck) error {
-	// Extract retry count from message headers
 	retryCount := c.getRetryCount(msg)
 
-	// Check if we've exceeded max retries
 	if retryCount >= c.retryConfig.MaxRetries {
 		log.Printf("Max retries (%d) exceeded for topic %s, sending to DLT", c.retryConfig.MaxRetries, topic)
 		return c.sendToDLT(topic, msg, "max_retries_exceeded")
 	}
 
-	// Process the message
 	shouldAck, err := handler(msg)
 	if err != nil {
 		log.Printf("Handler error for topic %s (attempt %d/%d): %v", topic, retryCount+1, c.retryConfig.MaxRetries, err)
 
-		// Don't acknowledge - will be retried
 		return c.scheduleRetry(topic, msg, retryCount)
 	}
 
 	if shouldAck {
-		// Manually commit the offset
 		_, err := c.consumer.CommitMessage(msg)
 		if err != nil {
 			log.Printf("Failed to commit message for topic %s: %v", topic, err)
@@ -147,7 +142,6 @@ func (c *Consumer) scheduleRetry(topic string, msg *kafka.Message, retryCount in
 func (c *Consumer) sendToDLT(topic string, msg *kafka.Message, reason string) error {
 	dltTopic := topic + ".dlt"
 
-	// Add DLT metadata to message headers
 	msg.Headers = append(msg.Headers, kafka.Header{
 		Key:   "dlt_reason",
 		Value: []byte(reason),
@@ -160,7 +154,6 @@ func (c *Consumer) sendToDLT(topic string, msg *kafka.Message, reason string) er
 		return err
 	}
 
-	// Acknowledge the original message to prevent infinite retries
 	_, err = c.consumer.CommitMessage(msg)
 	if err != nil {
 		log.Printf("Failed to commit message after sending to DLT: %v", err)
